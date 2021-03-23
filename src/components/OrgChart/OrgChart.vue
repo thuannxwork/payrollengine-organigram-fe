@@ -70,7 +70,7 @@
 <script>
     import OrgChart from "vue-organization-chart";
     import "vue-organization-chart/dist/orgchart.css";
-    // import axios from 'axios';
+    import axios from 'axios';
     import $ from "jquery";
 
     export default {
@@ -115,9 +115,9 @@
         },
         mounted() {
             // GET request using axios with set headers
-            // const headers = {"Access-Control-Allow-Origin": "*", "Content-Type": "application/json"};
-            // axios.get("http://localhost:8081/payroll-organigram-service/1001/st/20", {headers})
-            //     .then(response => this.ds = response.data);
+            const headers = {"Access-Control-Allow-Origin": "*", "Content-Type": "application/json"};
+            axios.get("http://localhost:8081/payroll-organigram-service/1001", {headers})
+                .then(response => this.ds = response.data);
         },
         methods: {
             selectNode(nodeData) {
@@ -184,5 +184,15 @@
         color: black;
         background-color: orange;
     }
+
+    .orgchart-container {
+      font-family: Arial;
+      height: 700px;
+      width:90%;
+      border-radius: 5px;
+      overflow: auto;
+      text-align: center;
+    }
+
 
 </style>
