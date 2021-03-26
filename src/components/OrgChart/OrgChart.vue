@@ -55,7 +55,7 @@
                                 <b-img v-bind="mainProps" rounded="circle" alt="User profile" src="http://quanlyhoivien.hoinhabaohatinh.org.vn/upload/anhtrong.jpeg">
                                 </b-img>
                             </div>
-                            <strong>{{nodeData.id}}</strong>
+                            <strong>{{nodeData.employeeId}}</strong>
                             <div v-if="interactMode === EDIT_MODE">
                                 <b-dropdown size="sm" variant="link" toggle-class="text-decoration-none"
                                             no-caret>
@@ -68,8 +68,10 @@
                                     </b-dropdown-item>
                                 </b-dropdown>
                             </div>
-                            <h6><i>{{nodeData.name}}</i></h6>
-                            <h6>{{nodeData.title}}</h6>
+
+                            <h6><i>{{nodeData.orgUnitName}}</i></h6>
+                            <h6><i>{{nodeData.postion && nodeData.postion.name ? nodeData.postion.name : ""}}</i></h6>
+                            <h6>{{nodeData.name}}</h6>
                         </b-card>
                     </template>
                 </OrgChart>
@@ -131,29 +133,7 @@
 
         data() {
             return {
-                dsPeople: {
-                    'id': '1',
-                    'name': 'Lao Lao',
-                    'title': 'general manager',
-                    'children': [
-                        {'id': '2', 'name': 'Bo Miao', 'title': 'department manager'},
-                        {
-                            'id': '3', 'name': 'Su Miao', 'title': 'department manager',
-                            'children': [
-                                {'id': '4', 'name': 'Tie Hua', 'title': 'senior engineer'},
-                                {
-                                    'id': '5', 'name': 'Hei Hei', 'title': 'senior engineer',
-                                    'children': [
-                                        {'id': '6', 'name': 'Pang Pang', 'title': 'engineer'},
-                                        {'id': '7', 'name': 'Xiang Xiang', 'title': 'UE engineer'}
-                                    ]
-                                }
-                            ]
-                        },
-                        {'id': '8', 'name': 'Hong Miao', 'title': 'department manager'},
-                        {'id': '9', 'name': 'Chun Miao', 'title': 'department manager'}
-                    ]
-                },
+                dsPeople: {},
                 ds: {},
                 totalVuePackages: null,
                 ocKey: 0,
@@ -184,7 +164,7 @@
                     .then(response => this.ds = response.data);
             },
             getEmployeeUnit() {
-              axios.get(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT + Constants.URI.ROOT_ID, this.headers)
+              axios.get(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT_EMPLOYEE + Constants.URI.ROOT_ID, this.headers)
                   .then(response => this.dsPeople = response.data);
             },
             selectNode(nodeData) {
