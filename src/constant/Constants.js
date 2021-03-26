@@ -7,5 +7,14 @@ export default {
         VIEW_MODE_ORG: "org",
         DISPLAY_MODE: "display",
         EDIT_MODE: "edit"
+    },
+    URI: {
+        HOST: "http://localhost:8081",
+        PAYROLL_ORGANIGRAM_SERVICE: "/payroll-organigram-service",
+        HOST_PAYROLL_ORG_SERVICE: "http://localhost:8081/payroll-organigram-service",
+        UNIT: "/unit",
+        DELETE: "/delete",
+        UPDATE: "/update",
+        ROOT_ID: "/1001"
     }
 }

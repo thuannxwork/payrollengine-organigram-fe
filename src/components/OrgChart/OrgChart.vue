@@ -176,12 +176,16 @@
         mounted() {
             // GET request using axios with set headers
             // const headers = {"Access-Control-Allow-Origin": "*", "Content-Type": "application/json"};
-            this.getNode();
+            this.getOrgUnitNodes();
         },
         methods: {
-            getNode() {
-                axios.get("http://localhost:8081/payroll-organigram-service/unit/1001", this.headers)
+            getOrgUnitNodes() {
+                axios.get(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT + Constants.URI.ROOT_ID, this.headers)
                     .then(response => this.ds = response.data);
+            },
+            getEmployeeUnit() {
+              axios.get(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT + Constants.URI.ROOT_ID, this.headers)
+                  .then(response => this.dsPeople = response.data);
             },
             selectNode(nodeData) {
                 $(".card.selected").removeClass("selected");
@@ -228,7 +232,7 @@
 
                     console.log(nodeRequest);
 
-                    axios.post("http://localhost:8081/payroll-organigram-service", nodeRequest, this.headers).then(this.getNode).catch(console.error);
+                    axios.post(Constants.URI.HOST_PAYROLL_ORG_SERVICE, nodeRequest, this.headers).then(this.getOrgUnitNodes).catch(console.error);
                     this.newNodeTitle = "";
                     this.newNodeName = "";
                 } else {
@@ -254,7 +258,8 @@
 
                     console.log(nodeRequest);
 
-                    axios.post("http://localhost:8081/payroll-organigram-service/update", nodeRequest, this.headers).then(this.getNode).catch(console.error);
+                    axios.post(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT + Constants.URI.UPDATE,
+                        nodeRequest, this.headers).then(this.getOrgUnitNodes).catch(console.error);
                     this.newNodeTitle = "";
                     this.newNodeName = "";
                 } else {
@@ -273,7 +278,8 @@
                         console.log(value)
                         if (value) {
                             if (this.viewMode === this.ORG_VIEW_MODE) {
-                                axios.delete(`http://localhost:8081/payroll-organigram-service/1001/${nodeData.orgUnitId}`, this.headers).then(this.getNode).catch(console.error);
+                                axios.delete(Constants.URI.HOST_PAYROLL_ORG_SERVICE +
+                                    Constants.URI.UNIT + Constants.URI.ROOT_ID + `/${nodeData.orgUnitId}`, this.headers).then(this.getOrgUnitNodes).catch(console.error);
                             }
                         }
                     })
@@ -281,10 +287,13 @@
                 console.log(nodeData)
             },
             changeViewMode() {
+              this.getOrgUnitNodes();
                 if (this.viewMode === this.ORG_VIEW_MODE){
-                    this.viewMode = this.PEOPLE_VIEW_MODE;
+                  this.getEmployeeUnit();
+                  this.viewMode = this.PEOPLE_VIEW_MODE;
                 } else {
-                    this.viewMode = this.ORG_VIEW_MODE;
+                  this.getOrgUnitNodes();
+                  this.viewMode = this.ORG_VIEW_MODE;
                 }
                 this.enableEdit = false;
             },
