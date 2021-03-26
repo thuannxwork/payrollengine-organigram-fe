@@ -16,7 +16,8 @@
     "json-digger": "^1.1.5",
     "vue": "^2.6.12",
     "vue-organization-chart": "^1.1.6",
-    "vue-router": "^3.5.1"
+    "vue-router": "^3.5.1",
+    "vue-typeahead-bootstrap": "^2.8.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.5.12",

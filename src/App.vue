@@ -29,7 +29,7 @@
     width: 200px !important;
   }
 
-  /*.selected {*/
-  /*  border: 4px solid rgba(217, 83, 79, 0.3) !important;*/
-  /*}*/
+  .selected {
+    border: 4px solid rgba(217, 83, 79, 0.3) !important;
+  }
 </style>
