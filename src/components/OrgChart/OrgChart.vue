@@ -180,7 +180,7 @@
         },
         methods: {
             getNode() {
-                axios.get("http://localhost:8081/payroll-organigram-service/1001", this.headers)
+                axios.get("http://localhost:8081/payroll-organigram-service/unit/1001", this.headers)
                     .then(response => this.ds = response.data);
             },
             selectNode(nodeData) {
