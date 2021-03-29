@@ -23,8 +23,8 @@
                             <b @click="selectNode(nodeData)">{{ nodeData.name }}</b>
                           </template> -->
                     <template slot-scope="{nodeData}">
-                        <b-card header-tag="header" footer-tag="footer" :id="`node` + nodeData.orgUnitId">
-                            <strong>{{nodeData.entityType}}</strong>
+                        <b-card header-tag="header" footer-tag="footer" :id="`node` + nodeData.id">
+                            <strong>{{nodeData.name}}</strong>
                             <div v-if="interactMode === EDIT_MODE">
                                 <b-dropdown size="sm" variant="link" toggle-class="text-decoration-none"
                                             no-caret>
@@ -32,12 +32,13 @@
                                         <b-icon-three-dots/>
                                     </template>
                                     <b-dropdown-item @click="editNode(nodeData)">Edit</b-dropdown-item>
-                                    <b-dropdown-item v-if="nodeData.orgUnitId !== -1" @click="deleteNode(nodeData)">
+                                    <b-dropdown-item @click="addNode(nodeData)">Add child node</b-dropdown-item>
+                                    <b-dropdown-item v-if="nodeData.id !== -1" @click="deleteNode(nodeData)">
                                         Delete
                                     </b-dropdown-item>
                                 </b-dropdown>
                             </div>
-                            <h6>{{nodeData.name}}</h6>
+<!--                            <h6>{{nodeData.name}}</h6>-->
                         </b-card>
                     </template>
                 </OrgChart>
@@ -83,17 +84,17 @@
                     <div>
                         <!--                        <h3>New Node:</h3>-->
                         <!--                        <b-form-input v-model="newNodeTitle" placeholder="entryType" width="100"/>-->
-                        <vue-typeahead-bootstrap
-                                :data="['type_1', 'type_2', 'type_3', 'type_4', 'type_5']"
-                                v-model="newNodeTitle"
-                                placeholder="entry"
-                                :show-all-results="true"
-                        />
+<!--                        <vue-typeahead-bootstrap-->
+<!--                                :data="['type_1', 'type_2', 'type_3', 'type_4', 'type_5']"-->
+<!--                                v-model="newNodeTitle"-->
+<!--                                placeholder="entry"-->
+<!--                                :show-all-results="true"-->
+<!--                        />-->
                         <b-form-input v-model="newNodeName" placeholder="name" width="100"/>
                     </div>
                     <br/>
                     <div>
-                        <b-button @click="addChildNode" variant="outline-primary" size="sm" class="new-button">Add Child
+                        <b-button @click="addChildNode" variant="outline-primary" size="sm" class="new-button" v-if="isAdded">Add Child
                             Node
                         </b-button>
                         <!--                        <b-button @click="addSiblingNode" variant="outline-primary" size="sm" class="new-button">Add-->
@@ -105,7 +106,7 @@
                         <!--                        <b-button @click="removeNodes" variant="outline-primary" size="sm" class="new-button">Remove-->
                         <!--                            Nodes-->
                         <!--                        </b-button>-->
-                        <b-button @click="updateNode" variant="outline-primary" size="sm" class="new-button">Update
+                        <b-button @click="updateNode" variant="outline-primary" size="sm" class="new-button" v-if="!isAdded">Update
                             Node
                         </b-button>
                     </div>
@@ -121,14 +122,14 @@
     import "vue-organization-chart/dist/orgchart.css";
     import axios from 'axios';
     import $ from "jquery";
-    import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap';
+    // import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap';
     import Constants from '../../constant/Constants.js';
 
     export default {
         name: 'OrgChartComponent',
         components: {
             OrgChart,
-            VueTypeaheadBootstrap
+            // VueTypeaheadBootstrap
         },
 
         data() {
@@ -150,7 +151,8 @@
                 ORG_VIEW_MODE: Constants.APP.VIEW_MODE_ORG,
                 DISPLAY_MODE: Constants.APP.DISPLAY_MODE,
                 EDIT_MODE: Constants.APP.EDIT_MODE,
-                mainProps: { width: 50, height: 50, class: 'm1' }
+                mainProps: { width: 50, height: 50, class: 'm1' },
+                isAdded: false,
             }
         },
         mounted() {
@@ -203,18 +205,17 @@
                     // alert("add child node")
                     let nodeRequest = {
                         name: this.newNodeName,
-                        entityType: this.newNodeTitle,
-                        rootId: this.nodeSelect.rootId,
+                        rootId: Constants.APP.ROOT_ID,
                         parentOrgUnitId: [
-                            this.nodeSelect.orgUnitId
+                            this.nodeSelect.id
                         ]
                     };
 
                     console.log(nodeRequest);
 
-                    axios.post(Constants.URI.HOST_PAYROLL_ORG_SERVICE, nodeRequest, this.headers).then(this.getOrgUnitNodes).catch(console.error);
-                    this.newNodeTitle = "";
-                    this.newNodeName = "";
+                    axios.post(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT, nodeRequest, this.headers).then(this.getOrgUnitNodes).catch(console.error);
+
+                    this.afterAddOrUpdate();
                 } else {
                     alert("Add child node people");
                 }
@@ -240,15 +241,26 @@
 
                     axios.post(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT + Constants.URI.UPDATE,
                         nodeRequest, this.headers).then(this.getOrgUnitNodes).catch(console.error);
-                    this.newNodeTitle = "";
-                    this.newNodeName = "";
+
+                    this.afterAddOrUpdate();
                 } else {
                     alert("update node people");
                 }
             },
             async editNode(nodeData) {
                 this.nodeSelect = nodeData;
+                // this.newNodeTitle = no;
+                this.newNodeName = nodeData.name;
+                this.isAdded = false;
                 this.selectNode(nodeData);
+            },
+            async addNode(nodeData) {
+                this.newNodeTitle = "";
+                this.newNodeName = "";
+                this.nodeSelect = nodeData;
+
+                this.enableEdit = true;
+                this.isAdded = true;
             },
             async deleteNode(nodeData) {
                 this.boxOne = ''
@@ -259,7 +271,7 @@
                         if (value) {
                             if (this.viewMode === this.ORG_VIEW_MODE) {
                                 axios.delete(Constants.URI.HOST_PAYROLL_ORG_SERVICE +
-                                    Constants.URI.UNIT + Constants.URI.ROOT_ID + `/${nodeData.orgUnitId}`, this.headers).then(this.getOrgUnitNodes).catch(console.error);
+                                    Constants.URI.UNIT + Constants.URI.ROOT_ID + `/${nodeData.id}`, this.headers).then(this.getOrgUnitNodes).catch(console.error);
                             }
                         }
                     })
@@ -283,6 +295,11 @@
                 } else {
                     this.interactMode = this.DISPLAY_MODE;
                 }
+            },
+            afterAddOrUpdate() {
+                this.nodeSelect = {};
+                this.newNodeName = "";
+                this.enableEdit = false;
             }
         }
     }

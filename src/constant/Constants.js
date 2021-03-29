@@ -6,7 +6,8 @@ export default {
         VIEW_MODE_PEOPLE: "people",
         VIEW_MODE_ORG: "org",
         DISPLAY_MODE: "display",
-        EDIT_MODE: "edit"
+        EDIT_MODE: "edit",
+        ROOT_ID: 1001
     },
     URI: {
         HOST: "http://localhost:8081",
