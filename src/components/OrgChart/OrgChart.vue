@@ -14,10 +14,18 @@
             <b-button class="custom-button" size="sm">Settings Layout</b-button>
         </b-row>
         <b-row>
-            <b-col col :sm="!enableEdit ? 12 : 10">
+            <b-col sm="1">
+                <div>
+                    <b-form-datepicker v-model="searchDate" class="mb-2 ml-2"
+                                       style="width: 180px !important;"></b-form-datepicker>
+                </div>
+                <div>
+                    <b-button class="custom-button" size="sm">Search</b-button>
+                </div>
+            </b-col>
+            <b-col col :sm="!enableEdit ? 11 : 9">
                 <!--                Org chart-->
-                <OrgChart :datasource="ds" :pan="true"
-                          :zoom="true"
+                <OrgChart :datasource="ds"
                           @click.native="clickContainer($event)" v-if="viewMode === ORG_VIEW_MODE">
                     <!--       <template slot-scope="{ nodeData }">
                             <b @click="selectNode(nodeData)">{{ nodeData.name }}</b>
@@ -38,14 +46,13 @@
                                     </b-dropdown-item>
                                 </b-dropdown>
                             </div>
-<!--                            <h6>{{nodeData.name}}</h6>-->
+                            <!--                            <h6>{{nodeData.name}}</h6>-->
                         </b-card>
                     </template>
                 </OrgChart>
 
                 <!--                People chart-->
-                <OrgChart :datasource="dsPeople" :pan="true"
-                          :zoom="true"
+                <OrgChart :datasource="dsPeople"
                           @click.native="clickContainer($event)" v-if="viewMode === PEOPLE_VIEW_MODE">
                     <!--       <template slot-scope="{ nodeData }">
                             <b @click="selectNode(nodeData)">{{ nodeData.name }}</b>
@@ -53,7 +60,8 @@
                     <template slot-scope="{nodeData}">
                         <b-card header-tag="header" footer-tag="footer" :id="`node-people` + nodeData.id">
                             <div>
-                                <b-img v-bind="mainProps" rounded="circle" alt="User profile" src="http://quanlyhoivien.hoinhabaohatinh.org.vn/upload/anhtrong.jpeg">
+                                <b-img v-bind="mainProps" rounded="circle" alt="User profile"
+                                       src="http://quanlyhoivien.hoinhabaohatinh.org.vn/upload/anhtrong.jpeg">
                                 </b-img>
                             </div>
                             <strong>{{nodeData.employeeId}}</strong>
@@ -63,8 +71,10 @@
                                     <template #button-content>
                                         <b-icon-three-dots/>
                                     </template>
-                                    <b-dropdown-item @click="editNode(nodeData)">Edit</b-dropdown-item>
-                                    <b-dropdown-item v-if="nodeData.id !== 1" @click="deleteNode(nodeData)">
+                                    <b-dropdown-item @click="editPeopleNode(nodeData)">Edit</b-dropdown-item>
+                                    <b-dropdown-item @click="addChildPeopleNode(nodeData)">Add child node
+                                    </b-dropdown-item>
+                                    <b-dropdown-item v-if="nodeData.id !== 1" @click="deletePeopleNode(nodeData)">
                                         Delete
                                     </b-dropdown-item>
                                 </b-dropdown>
@@ -76,7 +86,7 @@
                         </b-card>
                     </template>
                 </OrgChart>
-<!--                <div v-if="viewMode === PEOPLE_VIEW_MODE">PEOPLE</div>-->
+                <!--                <div v-if="viewMode === PEOPLE_VIEW_MODE">PEOPLE</div>-->
 
             </b-col>
             <b-col col :sm="enableEdit ? 2 : 0" v-if="enableEdit">
@@ -84,17 +94,28 @@
                     <div>
                         <!--                        <h3>New Node:</h3>-->
                         <!--                        <b-form-input v-model="newNodeTitle" placeholder="entryType" width="100"/>-->
-<!--                        <vue-typeahead-bootstrap-->
-<!--                                :data="['type_1', 'type_2', 'type_3', 'type_4', 'type_5']"-->
-<!--                                v-model="newNodeTitle"-->
-<!--                                placeholder="entry"-->
-<!--                                :show-all-results="true"-->
-<!--                        />-->
-                        <b-form-input v-model="newNodeName" placeholder="name" width="100"/>
+                        <!--                        <vue-typeahead-bootstrap-->
+                        <!--                                :data="['type_1', 'type_2', 'type_3', 'type_4', 'type_5']"-->
+                        <!--                                v-model="newNodeTitle"-->
+                        <!--                                placeholder="entry"-->
+                        <!--                                :show-all-results="true"-->
+                        <!--                        />-->
+                        <b-form-input v-model="newNodeName" placeholder="name" width="100"
+                                      v-if="viewMode === ORG_VIEW_MODE"/>
+                        <div v-if="viewMode === PEOPLE_VIEW_MODE">
+                            <!--                            child org unit-->
+                            <b-form-select v-model="peopleAddObject.selectedOrgUnit"
+                                           :options="lstOrgUnit"></b-form-select>
+                            <b-form-select v-model="peopleAddObject.selectedOrgPos"
+                                           :options="lstPosition"></b-form-select>
+                            <b-form-input v-model="peopleAddObject.name" placeholder="name" width="100"/>
+                        </div>
+
                     </div>
                     <br/>
                     <div>
-                        <b-button @click="addChildNode" variant="outline-primary" size="sm" class="new-button" v-if="isAdded">Add Child
+                        <b-button @click="addChildNode" variant="outline-primary" size="sm" class="new-button"
+                                  v-if="isAdded">Add Child
                             Node
                         </b-button>
                         <!--                        <b-button @click="addSiblingNode" variant="outline-primary" size="sm" class="new-button">Add-->
@@ -106,11 +127,32 @@
                         <!--                        <b-button @click="removeNodes" variant="outline-primary" size="sm" class="new-button">Remove-->
                         <!--                            Nodes-->
                         <!--                        </b-button>-->
-                        <b-button @click="updateNode" variant="outline-primary" size="sm" class="new-button" v-if="!isAdded">Update
+                        <b-button @click="updateNode" variant="outline-primary" size="sm" class="new-button"
+                                  v-if="!isAdded">Update
                             Node
                         </b-button>
                     </div>
                 </div>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col sm="10"></b-col>
+            <b-col sm="1">
+                <!--                <b-form-input id="range-1" v-model="zoomValueNew" type="range" min="0" max="10" step="1"-->
+                <!--                              @update="zoomHandler"></b-form-input>-->
+                <b-button-group style="background-color: white; color: black">
+                    <b-button class="custom-zoom-button" @click="zoomOutHandler">
+                        <b-icon-zoom-out></b-icon-zoom-out>
+                    </b-button>
+<!--                    <div class="zoom-text">-->
+<!--                        <span>{{zoomLevel}}%</span>-->
+<!--                    </div>-->
+                    <b-button class="custom-zoom-button" @click="zoomInHandler">
+                        <b-icon-zoom-in></b-icon-zoom-in>
+                    </b-button>
+                </b-button-group>
+
+                <!--                zoom in/zoom out-->
             </b-col>
         </b-row>
         <!--        selected node: {{this.selectedNodes}}-->
@@ -131,7 +173,18 @@
             OrgChart,
             // VueTypeaheadBootstrap
         },
-
+        props: {
+            zoomoutLimit: {
+                type: Number,
+                required: false,
+                default: 0.5
+            },
+            zoominLimit: {
+                type: Number,
+                required: false,
+                default: 7
+            }
+        },
         data() {
             return {
                 dsPeople: {},
@@ -151,14 +204,52 @@
                 ORG_VIEW_MODE: Constants.APP.VIEW_MODE_ORG,
                 DISPLAY_MODE: Constants.APP.DISPLAY_MODE,
                 EDIT_MODE: Constants.APP.EDIT_MODE,
-                mainProps: { width: 50, height: 50, class: 'm1' },
+                mainProps: {width: 50, height: 50, class: 'm1'},
                 isAdded: false,
+                nodePeopleSelect: {},
+                peopleAddObject: {
+                    selectedOrgUnit: {},
+                    selectedOrgPos: {},
+                    name: ""
+                },
+                lstPosition: [],
+                lstOrgUnit: [],
+                searchDate: '',
+                zoomValueNew: "3.5",
+                zoomValueOld: "",
+                zoomLevel: 100,
+                transformVal: "",
+                cursorVal: 'default',
+                panning: false,
+                startX: 0,
+                startY: 0,
             }
+        },
+        created() {
+            this.zoomValueOld = this.zoomValueNew;
+            this.transformValOld = this.transformVal;
         },
         mounted() {
             // GET request using axios with set headers
             // const headers = {"Access-Control-Allow-Origin": "*", "Content-Type": "application/json"};
             this.getOrgUnitNodes();
+            $('.orgchart').mousedown(e => {
+                // console.log(e);
+                this.panStartHandler(e);
+            })
+
+            $('.orgchart').mousemove(e => {
+                // console.log(e);
+                if (this.panning) {
+                    this.panHandler(e);
+                }
+            })
+            $('.orgchart-container').mouseup(e => {
+                if (this.panning) {
+                    this.panEndHandler(e)
+                }
+            })
+
         },
         methods: {
             getOrgUnitNodes() {
@@ -166,8 +257,8 @@
                     .then(response => this.ds = response.data);
             },
             getEmployeeUnit() {
-              axios.get(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT_EMPLOYEE + Constants.URI.ROOT_ID, this.headers)
-                  .then(response => this.dsPeople = response.data);
+                axios.get(Constants.URI.HOST_PAYROLL_ORG_SERVICE + Constants.URI.UNIT_EMPLOYEE + Constants.URI.ROOT_ID, this.headers)
+                    .then(response => this.dsPeople = response.data);
             },
             selectNode(nodeData) {
                 $(".card.selected").removeClass("selected");
@@ -279,13 +370,12 @@
                 console.log(nodeData)
             },
             changeViewMode() {
-              this.getOrgUnitNodes();
-                if (this.viewMode === this.ORG_VIEW_MODE){
-                  this.getEmployeeUnit();
-                  this.viewMode = this.PEOPLE_VIEW_MODE;
+                if (this.viewMode === this.ORG_VIEW_MODE) {
+                    this.getEmployeeUnit();
+                    this.viewMode = this.PEOPLE_VIEW_MODE;
                 } else {
-                  this.getOrgUnitNodes();
-                  this.viewMode = this.ORG_VIEW_MODE;
+                    this.getOrgUnitNodes();
+                    this.viewMode = this.ORG_VIEW_MODE;
                 }
                 this.enableEdit = false;
             },
@@ -300,6 +390,154 @@
                 this.nodeSelect = {};
                 this.newNodeName = "";
                 this.enableEdit = false;
+            },
+            async editPeopleNode(peopleNode) {
+                this.nodePeopleSelect = peopleNode;
+                this.isAdded = false;
+                this.selectNode(peopleNode);
+
+                // load list option
+
+            },
+            async addChildPeopleNode(peopleNode) {
+                console.log(peopleNode)
+            },
+            async deletePeopleNode(peopleNode) {
+                console.log(peopleNode)
+
+            },
+            setChartScale(newScale) {
+                let matrix = ''
+                let targetScale = 1
+                if (this.transformVal === '') {
+                    this.transformVal = 'matrix(' + newScale + ', 0, 0, ' + newScale + ', 0, 0)'
+                } else {
+                    matrix = this.transformVal.split(',')
+                    if (this.transformVal.indexOf('3d') === -1) {
+                        targetScale = Math.abs(window.parseFloat(matrix[3]) * newScale)
+                        if (targetScale > this.zoomoutLimit && targetScale < this.zoominLimit) {
+                            matrix[0] = 'matrix(' + targetScale
+                            matrix[3] = targetScale
+                            this.transformVal = matrix.join(',')
+                        }
+                    } else {
+                        targetScale = Math.abs(window.parseFloat(matrix[5]) * newScale)
+                        if (targetScale > this.zoomoutLimit && targetScale < this.zoominLimit) {
+                            matrix[0] = 'matrix3d(' + targetScale
+                            matrix[5] = targetScale
+                            this.transformVal = matrix.join(',')
+                        }
+                    }
+                }
+
+                // console.log(this.transformVal)
+                // this.applyCss();
+            },
+            zoomHandler() {
+                // console.log(+this.zoomValue)
+                let zoomValue = 0;
+                if (+this.zoomValueOld > +this.zoomValueNew) {
+                    zoomValue = 1;
+                } else {
+                    zoomValue = -1;
+                }
+                this.zoomValueOld = this.zoomValueNew;
+
+                let newScale = 1 + (zoomValue > 0 ? -0.2 : 0.2)
+                console.log('newScale', newScale);
+                this.setChartScale(newScale)
+            },
+            zoomInHandler() {
+                let newScale = 1.2
+                this.setChartScale(newScale)
+            },
+            zoomOutHandler() {
+                let newScale = 0.8
+                this.setChartScale(newScale)
+            },
+            panEndHandler() {
+                // console.log(`panEndHandler`)
+                this.panning = false
+                this.cursorVal = 'default'
+                this.applyCss();
+            },
+            panHandler(e) {
+                // console.log(`panHandler`)
+                let newX = 0
+                let newY = 0
+                if (!e.targetTouches) { // pand on desktop
+                    newX = e.pageX - this.startX
+                    newY = e.pageY - this.startY
+                } else if (e.targetTouches.length === 1) { // pan on mobile device
+                    newX = e.targetTouches[0].pageX - this.startX
+                    newY = e.targetTouches[0].pageY - this.startY
+                } else if (e.targetTouches.length > 1) {
+                    return;
+                }
+                if (this.transformVal === '') {
+                    if (this.transformVal.indexOf('3d') === -1) {
+                        this.transformVal = 'matrix(1,0,0,1,' + newX + ',' + newY + ')'
+                    } else {
+                        this.transformVal = 'matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,' + newX + ', ' + newY + ',0,1)'
+                    }
+                } else {
+                    let matrix = this.transformVal.split(',')
+                    if (this.transformVal.indexOf('3d') === -1) {
+                        matrix[4] = newX
+                        matrix[5] = newY + ')'
+                    } else {
+                        matrix[12] = newX
+                        matrix[13] = newY
+                    }
+                    this.transformVal = matrix.join(',')
+                }
+                // this.applyCss();
+            },
+            panStartHandler(e) {
+                // console.log(`panStartHandler`)
+                if ($(e.target).closest('.node').length) {
+                    this.panning = false
+                    return
+                } else {
+                    this.cursorVal = 'move'
+                    this.panning = true
+                }
+                let lastX = 0
+                let lastY = 0
+                if (this.transformVal !== '') {
+                    let matrix = this.transformVal.split(',')
+                    if (this.transformVal.indexOf('3d') === -1) {
+                        lastX = parseInt(matrix[4])
+                        lastY = parseInt(matrix[5])
+                    } else {
+                        lastX = parseInt(matrix[12])
+                        lastY = parseInt(matrix[13])
+                    }
+                }
+                if (!e.targetTouches) { // pand on desktop
+                    this.startX = e.pageX - lastX
+                    this.startY = e.pageY - lastY
+                } else if (e.targetTouches.length === 1) { // pan on mobile device
+                    this.startX = e.targetTouches[0].pageX - lastX
+                    this.startY = e.targetTouches[0].pageY - lastY
+                } else if (e.targetTouches.length > 1) {
+                    return
+                }
+            },
+            applyCss() {
+                $('.orgchart').css({
+                    "transform": this.transformVal,
+                    "cursor": this.cursorVal
+                });
+            }
+        },
+        watch: {
+            transformVal: function () {
+                this.applyCss();
+            },
+            viewMode: function () {
+                this.transformVal = Constants.APP.DEFAULT_TRANSFORM
+                this.applyCss();
             }
         }
     }
@@ -325,11 +563,25 @@
 
     .orgchart-container {
         font-family: Arial;
-        height: 700px;
+        height: 500px;
         width: 90%;
         border-radius: 5px;
         overflow: auto;
         text-align: center;
+    }
+
+    .custom-zoom-button {
+        color: black;
+        background-color: white;
+    }
+
+    .zoom-text {
+        border: 1px solid black;
+        border-left: 0px;
+        padding-left: 10px;
+        padding-right: 10px;
+        text-align: center;
+        padding-top: 0.4rem
     }
 
 </style>

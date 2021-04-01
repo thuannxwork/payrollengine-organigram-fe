@@ -7,7 +7,8 @@ export default {
         VIEW_MODE_ORG: "org",
         DISPLAY_MODE: "display",
         EDIT_MODE: "edit",
-        ROOT_ID: 1001
+        ROOT_ID: 1001,
+        DEFAULT_TRANSFORM: "matrix(1, 0, 0, 1, 0, 0)"
     },
     URI: {
         HOST: "http://localhost:8081",
